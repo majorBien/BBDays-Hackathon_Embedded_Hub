@@ -23,8 +23,10 @@ static const char *TAG = "LORA";
 
 void task_rx(void *pvParameters)
 {
+	ESP_LOGI(pcTaskGetName(NULL), "Start Receiver Start");
+	ESP_LOGI(pcTaskGetName(NULL), "Waiting for Json...");
 	while(1){
-		ESP_LOGI(pcTaskGetName(NULL), "Start");
+
 		uint8_t buf[256]; // Maximum Payload size of SX1261/62/68 is 255
 
 		uint8_t rxLen = LoRaReceive(buf, sizeof(buf));
@@ -34,6 +36,7 @@ void task_rx(void *pvParameters)
 			int8_t rssi, snr;
 			GetPacketStatus(&rssi, &snr);
 			ESP_LOGI(pcTaskGetName(NULL), "rssi=%d[dBm] snr=%d[dB]", rssi, snr);
+			ESP_LOGI(pcTaskGetName(NULL), "Waiting for Json...");
 		}
 		vTaskDelay(pdMS_TO_TICKS(1000));
 	}

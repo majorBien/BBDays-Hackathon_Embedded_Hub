@@ -20,9 +20,9 @@
 #define LORA_RECEIVE_CORE_ID				0	
 
 // WiFi application task
-#define BLUETOOTH_TASK_STACK_SIZE			4096
+#define BLUETOOTH_TASK_STACK_SIZE			2048
 #define BLUETOOTH_TASK_PRIORITY				4
-#define BLUETOOTH_TASK_CORE_ID				1
+#define BLUETOOTH_TASK_CORE_ID				0
 
 
 #endif /* MAIN_TASKS_SETTINGS_H_ */
