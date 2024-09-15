@@ -156,8 +156,8 @@ static httpd_handle_t http_server_configure(void)
 				
 		
 		httpd_register_uri_handler(http_server_handle, &json_post2);
-		*/
 		
+		*/
 		httpd_uri_t json_post3 = {
     			.uri = "/register",
    				 .method = HTTP_POST,
