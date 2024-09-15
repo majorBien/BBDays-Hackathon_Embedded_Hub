@@ -17,7 +17,7 @@
 
 #include "tasks_settings.h"
 #include "wifi.h"
-//#include "http_server.h"
+#include "http_server.h"
 
 static const char TAG [] = "wifi_app";
 static QueueHandle_t wifi_app_queue_handle;
@@ -154,7 +154,7 @@ static void wifi_app_task(void *pvParameters)
 			{
 				case WIFI_APP_MSG_START_HTTP_SERVER:
 					ESP_LOGI(TAG, "WIFI_APP_MSG_START_HTTP_SERVER");
-					//http_server_start();
+					http_server_start();
 
 					break;
 

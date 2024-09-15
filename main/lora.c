@@ -18,29 +18,36 @@
 #include "ra01s.h"
 #include "lora.h"
 #include "tasks_settings.h"
+#include "http_server.c"
 
-static const char *TAG = "LORA";
+//static const char *TAG = "LORA";
+static SemaphoreHandle_t json_mutex;
 
 void task_rx(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetName(NULL), "Start Receiver Start");
-	ESP_LOGI(pcTaskGetName(NULL), "Waiting for Json...");
-	while(1){
+	ESP_LOGI(pcTaskGetName(NULL), "Start Receiver");
+	ESP_LOGI(pcTaskGetName(NULL), "Waiting for JSON...");
 
-		uint8_t buf[256]; // Maximum Payload size of SX1261/62/68 is 255
-
+	while(1) {
+		uint8_t buf[256];  
 		uint8_t rxLen = LoRaReceive(buf, sizeof(buf));
-		if ( rxLen > 0 ) { 
-			ESP_LOGI(pcTaskGetName(NULL), "%d byte packet received:[%.*s]", rxLen, rxLen, buf);
+
+		if (rxLen > 0) { 
+			xSemaphoreTake(json_mutex, portMAX_DELAY);
+
+			snprintf(json_buffer, sizeof(json_buffer), "%.*s", rxLen, buf);
+
+			ESP_LOGI(pcTaskGetName(NULL), "%d byte packet received: [%.*s]", rxLen, rxLen, buf);
 
 			int8_t rssi, snr;
 			GetPacketStatus(&rssi, &snr);
-			ESP_LOGI(pcTaskGetName(NULL), "rssi=%d[dBm] snr=%d[dB]", rssi, snr);
-			ESP_LOGI(pcTaskGetName(NULL), "Waiting for Json...");
-		}
-		vTaskDelay(pdMS_TO_TICKS(1000));
-	}
+			ESP_LOGI(pcTaskGetName(NULL), "rssi=%d[dBm], snr=%d[dB]", rssi, snr);
 
+			xSemaphoreGive(json_mutex);
+		}
+
+		vTaskDelay(pdMS_TO_TICKS(1000));  
+	}
 }
 
 

@@ -24,8 +24,8 @@ typedef void (*wifi_connected_event_callback_t)(void);
 #define WIFI_AP_SSID_HIDDEN			0					
 #define WIFI_AP_MAX_CONNECTIONS		5					
 #define WIFI_AP_BEACON_INTERVAL		100					
-#define WIFI_AP_IP					"192.168.0.1"		
-#define WIFI_AP_GATEWAY				"192.168.0.1"		
+#define WIFI_AP_IP					"192.168.0.3"		
+#define WIFI_AP_GATEWAY				"192.168.0.3"		
 #define WIFI_AP_NETMASK				"255.255.255.0"		
 #define WIFI_AP_BANDWIDTH			WIFI_BW_HT20		
 #define WIFI_STA_POWER_SAVE			WIFI_PS_NONE		
