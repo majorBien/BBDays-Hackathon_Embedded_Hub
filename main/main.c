@@ -10,6 +10,7 @@
 #include "ra01s.h"
 #include "lora.h"
 #include "nvs_flash.h"
+#include "wifi.h"
 
 
 static const char *TAG = "MAIN";
@@ -28,8 +29,10 @@ void app_main()
 	}
 	ESP_ERROR_CHECK(ret);
 	
+
 	loraInit();
 	loraTaskStart();
+	wifi_app_start();
 
 
 }
