@@ -33,7 +33,7 @@ static QueueHandle_t http_server_monitor_queue_handle;
 
 static esp_err_t http_server_json_handler1(httpd_req_t *req);
 //static esp_err_t http_server_json_handler2(httpd_req_t *req);
-//static esp_err_t http_server_json_handler3(httpd_req_t *req);
+static esp_err_t http_server_json_handler3(httpd_req_t *req);
 
 
 
@@ -106,10 +106,6 @@ static void http_server_monitor(void *parameter)
 }
 
 
-
-
-
-
 static httpd_handle_t http_server_configure(void)
 {
 
@@ -157,18 +153,21 @@ static httpd_handle_t http_server_configure(void)
    				 .handler = http_server_json_handler2,
    				 .user_ctx = NULL
 		};
-		httpd_register_uri_handler(http_server_json_handle, &json_post2);
+				
+		
+		httpd_register_uri_handler(http_server_handle, &json_post2);
+		*/
 		
 		httpd_uri_t json_post3 = {
-    			.uri = "/request",
+    			.uri = "/register",
    				 .method = HTTP_POST,
    				 .handler = http_server_json_handler3,
    				 .user_ctx = NULL
 		};
 		
-		httpd_register_uri_handler(http_server_json_handle, &json_post3);
+		httpd_register_uri_handler(http_server_handle, &json_post3);
 		
-*/
+
 		return http_server_handle;
 	}
 
@@ -265,6 +264,7 @@ static esp_err_t http_server_json_handler1(httpd_req_t *req) {
     return ESP_OK; 
 
 }
+*/
 
 	static esp_err_t http_server_json_handler3(httpd_req_t *req)
 {
@@ -294,6 +294,6 @@ static esp_err_t http_server_json_handler1(httpd_req_t *req) {
     return ESP_OK; 
 
 }
-*/
+
 
 
