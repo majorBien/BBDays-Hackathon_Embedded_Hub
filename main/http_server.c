@@ -24,6 +24,7 @@ static SemaphoreHandle_t json_mutex;
 
 static const char TAG[] = "http_server";
 
+
 static httpd_handle_t http_server_handle = NULL;
 
 static TaskHandle_t task_http_server_monitor = NULL;
@@ -139,34 +140,35 @@ static httpd_handle_t http_server_configure(void)
 		ESP_LOGI(TAG, "http_server_configure: Registering URI handlers");
 
 
-		
 		httpd_uri_t json_post1 = {
-			.uri = "/Index/index",   
-			.method = HTTP_POST,
-			.handler = http_server_json_handler1,
-			.user_ctx = NULL
+    			.uri = "/index",
+   				 .method = HTTP_POST,
+   				 .handler = http_server_json_handler1,
+   				 .user_ctx = NULL
 		};
+		
 		httpd_register_uri_handler(http_server_handle, &json_post1);
-	/*	
+		
+		
+		/*
 		httpd_uri_t json_post2 = {
     			.uri = "/login",
    				 .method = HTTP_POST,
    				 .handler = http_server_json_handler2,
    				 .user_ctx = NULL
 		};
-		httpd_register_uri_handler(http_server_handle, &json_post2);
-
-
+		httpd_register_uri_handler(http_server_json_handle, &json_post2);
+		
 		httpd_uri_t json_post3 = {
-    			.uri = "/index",
+    			.uri = "/request",
    				 .method = HTTP_POST,
    				 .handler = http_server_json_handler3,
    				 .user_ctx = NULL
-		};		
-
-		httpd_register_uri_handler(http_server_handle, &json_post3);
+		};
+		
+		httpd_register_uri_handler(http_server_json_handle, &json_post3);
+		
 */
-
 		return http_server_handle;
 	}
 
@@ -205,31 +207,93 @@ BaseType_t http_server_monitor_send_message(http_server_message_e msgID)
 	msg.msgID = msgID;
 	return xQueueSend(http_server_monitor_queue_handle, &msg, portMAX_DELAY);
 }
-extern char json_buffer[];  // Globalny bufor do danych JSON
+extern char json_buffer[];  
 
-static esp_err_t http_server_json_handler1(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "JSON data requested to send:");
+static esp_err_t http_server_json_handler1(httpd_req_t *req) {
+    ESP_LOGI(TAG, "JSON data requested");
 
-	// Zabezpiecz dostęp do bufora json_buffer za pomocą mutexa
-	xSemaphoreTake(json_mutex, portMAX_DELAY);
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
 
-	// Sprawdź, czy w buforze JSON są dane
-	if (strlen(json_buffer) > 0) {
-		// Ustaw typ odpowiedzi na JSON
-		httpd_resp_set_type(req, "application/json");
+    xSemaphoreTake(json_mutex, portMAX_DELAY);
 
-		// Wyślij dane JSON do klienta
-		httpd_resp_send(req, json_buffer, strlen(json_buffer));
-		ESP_LOGI(TAG, "Sent JSON: %s", json_buffer);
-	} else {
-		// Jeśli bufor jest pusty, zwróć odpowiedni komunikat
-		const char *resp_str = "{\"error\": \"No data received from LoRa\"}";
-		httpd_resp_send(req, resp_str, strlen(resp_str));
-		ESP_LOGW(TAG, "No data in JSON buffer.");
-	}
+    if (strlen(json_buffer) > 0) {
+        esp_err_t result = httpd_resp_send(req, json_buffer, strlen(json_buffer));
+        if (result != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to send JSON response. Error: %d", result);
+            xSemaphoreGive(json_mutex);
+            return result;  
+        }
+        ESP_LOGI(TAG, "Sent JSON: %s", json_buffer);
+    } else {
+        const char *empty_response = "{}";
+        httpd_resp_send(req, empty_response, strlen(empty_response));
+        ESP_LOGI(TAG, "Sent empty JSON response");
+    }
 
-	xSemaphoreGive(json_mutex);  // Zwolnij mutex po odczycie danych
-
-	return ESP_OK;
+    xSemaphoreGive(json_mutex);
+    return ESP_OK; 
 }
+
+/*
+	static esp_err_t http_server_json_handler2(httpd_req_t *req)
+{
+       ESP_LOGI(TAG, "JSON data requested");
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
+
+    xSemaphoreTake(json_mutex, portMAX_DELAY);
+
+    if (strlen(json_buffer) > 0) {
+        esp_err_t result = httpd_resp_send(req, json_buffer, strlen(json_buffer));
+        if (result != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to send JSON response. Error: %d", result);
+            xSemaphoreGive(json_mutex);
+            return result;  
+        }
+        ESP_LOGI(TAG, "Sent JSON: %s", json_buffer);
+    } else {
+        const char *empty_response = "{}";
+        httpd_resp_send(req, empty_response, strlen(empty_response));
+        ESP_LOGI(TAG, "Sent empty JSON response");
+    }
+
+    xSemaphoreGive(json_mutex);
+    return ESP_OK; 
+
+}
+
+	static esp_err_t http_server_json_handler3(httpd_req_t *req)
+{
+       ESP_LOGI(TAG, "JSON data requested");
+
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Headers", "Content-Type");
+
+    xSemaphoreTake(json_mutex, portMAX_DELAY);
+
+    if (strlen(json_buffer) > 0) {
+        esp_err_t result = httpd_resp_send(req, json_buffer, strlen(json_buffer));
+        if (result != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to send JSON response. Error: %d", result);
+            xSemaphoreGive(json_mutex);
+            return result;  
+        }
+        ESP_LOGI(TAG, "Sent JSON: %s", json_buffer);
+    } else {
+        const char *empty_response = "{}";
+        httpd_resp_send(req, empty_response, strlen(empty_response));
+        ESP_LOGI(TAG, "Sent empty JSON response");
+    }
+
+    xSemaphoreGive(json_mutex);
+    return ESP_OK; 
+
+}
+*/
+
+
